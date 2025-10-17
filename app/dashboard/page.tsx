@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, DollarSign, Clock, CheckCircle, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ExpenseForm from "@/components/expense-form";
 export default function Dashboard() {
   const { user } = useUser();
   const currentUser = useQuery(api.users.getCurrentUser);
   const myExpenses = useQuery(api.expenses.getMyExpenses);
   const myTeam = useQuery(api.teams.getMyTeam);
   const router = useRouter();
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -27,10 +29,10 @@ export default function Dashboard() {
   
   if (currentUser === undefined) return <div>Loading...</div>;
   
-  // Temporarily skip user check to see dashboard
-  // if (currentUser === null) {
-  //   return <div>Welcome! Your dashboard is loading...</div>;
-  // }
+  if (currentUser === null) {
+    router.push("/onboarding");
+    return <div>Setting up your account...</div>;
+  }
 
   const totalExpenses = myExpenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0;
   const pendingCount = myExpenses?.filter(e => e.status === "pending").length || 0;
@@ -41,11 +43,16 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Smart<span className="text-blue-600">Expense</span>
+            </h1>
             <p className="text-gray-600">Welcome back, {user.firstName || user.emailAddresses[0].emailAddress}</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              className="bg-red-300 text-black hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] hover:-translate-y-1 transition-all duration-200"
+              onClick={() => setShowExpenseForm(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Expense
             </Button>
@@ -73,7 +80,7 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalExpenses.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-red-300">${totalExpenses.toFixed(2)}</div>
             </CardContent>
           </Card>
           
@@ -130,6 +137,16 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Expense Form Modal */}
+        {showExpenseForm && (
+          <ExpenseForm
+            onClose={() => setShowExpenseForm(false)}
+            onSuccess={() => {
+              // Expenses will automatically refresh due to Convex reactivity
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+"use node";
+
 export default {
   providers: [
     {

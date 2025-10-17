@@ -6,7 +6,7 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     role: v.union(v.literal("admin"), v.literal("manager"), v.literal("employee")),
-    teamId: v.id("teams"),
+    teamId: v.optional(v.id("teams")),
   }).index("by_email", ["email"]),
 
   teams: defineTable({

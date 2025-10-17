@@ -9,36 +9,30 @@ export const create = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    // Create user first if doesn't exist
-    let user = null;
-    if (identity?.email) {
-      user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("email"), identity.email))
-        .first();
-    }
+    // Get or create user first
+    let user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), identity.email))
+      .first();
 
-    // Create team
-    const teamId = await ctx.db.insert("teams", {
-      name: args.name,
-      createdBy: user?._id || "temp",
-    });
-
-    // Create or update user with team
     if (!user) {
+      // Create user without teamId first
       const userId = await ctx.db.insert("users", {
         name: identity?.name || identity?.email || "Test User",
         email: identity?.email || "test@example.com",
-        teamId,
         role: "admin",
       });
-      
-      // Update team with correct createdBy
-      await ctx.db.patch(teamId, { createdBy: userId });
-    } else {
-      await ctx.db.patch(user._id, { teamId, role: "admin" });
-      await ctx.db.patch(teamId, { createdBy: user._id });
+      user = await ctx.db.get(userId);
     }
+
+    // Create team with the actual user ID
+    const teamId = await ctx.db.insert("teams", {
+      name: args.name,
+      createdBy: user!._id,
+    });
+
+    // Update user with the correct teamId
+    await ctx.db.patch(user!._id, { teamId });
 
     return teamId;
   },

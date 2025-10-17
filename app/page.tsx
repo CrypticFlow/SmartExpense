@@ -17,8 +17,8 @@ export default function Home() {
     if (user && currentUser) {
       router.push("/dashboard");
     } else if (user && currentUser === null) {
-      // User exists but no currentUser record, go to dashboard
-      router.push("/dashboard");
+      // User exists but no currentUser record, go to onboarding
+      router.push("/onboarding");
     }
   }, [user, currentUser, router]);
 

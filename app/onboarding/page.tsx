@@ -1,25 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useUser, SignOutButton } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 
-export default function SimpleOnboarding() {
+export default function Onboarding() {
+  const { user } = useUser();
   const [teamName, setTeamName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const createTeam = useMutation(api.teams.create);
   const router = useRouter();
 
-  const handleCreateTeam = (e: React.FormEvent) => {
+  if (!user) return <div>Please sign in</div>;
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!teamName.trim()) return;
-    
-    // For now, just redirect to dashboard
-    localStorage.setItem("teamName", teamName);
-    router.push("/dashboard-simple");
+
+    setIsLoading(true);
+    try {
+      await createTeam({ name: teamName.trim() });
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Failed to create team:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <SignOutButton>
+          <Button variant="outline">
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        </SignOutButton>
+      </div>
+      
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Welcome to SmartExpense!</CardTitle>
@@ -44,9 +68,9 @@ export default function SimpleOnboarding() {
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={!teamName.trim()}
+              disabled={isLoading || !teamName.trim()}
             >
-              Create Team & Continue
+              {isLoading ? "Creating..." : "Create Team"}
             </Button>
           </form>
         </CardContent>
