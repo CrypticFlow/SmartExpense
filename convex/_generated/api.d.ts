@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as budgets from "../budgets.js";
 import type * as expenses from "../expenses.js";
+import type * as receipts from "../receipts.js";
 import type * as teams from "../teams.js";
 import type * as users from "../users.js";
 
@@ -27,7 +29,9 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  budgets: typeof budgets;
   expenses: typeof expenses;
+  receipts: typeof receipts;
   teams: typeof teams;
   users: typeof users;
 }>;

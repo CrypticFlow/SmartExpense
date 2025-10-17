@@ -5,11 +5,13 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, DollarSign, Clock, CheckCircle, LogOut, BarChart3 } from "lucide-react";
+import { Plus, DollarSign, Clock, CheckCircle, LogOut, BarChart3, Target, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ExpenseForm from "@/components/expense-form";
 import AnalyticsDashboard from "@/components/analytics-dashboard";
+import BudgetDashboard from "@/components/budget-dashboard";
+import TeamDashboard from "@/components/team-dashboard";
 export default function Dashboard() {
   const { user } = useUser();
   const currentUser = useQuery(api.users.getCurrentUser);
@@ -17,7 +19,7 @@ export default function Dashboard() {
   const myTeam = useQuery(api.teams.getMyTeam);
   const router = useRouter();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "analytics">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "analytics" | "budgets" | "team">("overview");
 
   useEffect(() => {
     if (!user) {
@@ -97,6 +99,30 @@ export default function Dashboard() {
             <BarChart3 className="h-4 w-4" />
             Analytics
           </button>
+          <button
+            onClick={() => setActiveTab("budgets")}
+            className={`px-6 py-3 font-medium text-sm flex items-center gap-2 ${
+              activeTab === "budgets"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Target className="h-4 w-4" />
+            Budgets
+          </button>
+          {(currentUser?.role === "admin" || currentUser?.role === "manager") && (
+            <button
+              onClick={() => setActiveTab("team")}
+              className={`px-6 py-3 font-medium text-sm flex items-center gap-2 ${
+                activeTab === "team"
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              Team
+            </button>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -173,6 +199,16 @@ export default function Dashboard() {
         {/* Analytics Tab */}
         {activeTab === "analytics" && (
           <AnalyticsDashboard />
+        )}
+
+        {/* Budgets Tab */}
+        {activeTab === "budgets" && (
+          <BudgetDashboard />
+        )}
+
+        {/* Team Tab */}
+        {activeTab === "team" && (
+          <TeamDashboard />
         )}
 
         {/* Expense Form Modal */}
