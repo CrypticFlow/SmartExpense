@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,8 +32,11 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isProcessingReceipt, setIsProcessingReceipt] = useState(false);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   const createExpense = useMutation(api.expenses.create);
+  const uploadAndProcessReceipt = useAction(api.receipts.uploadAndProcessReceipt);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +67,33 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleReceiptUpload = async (file: File) => {
+    setIsProcessingReceipt(true);
+    setError("");
+    
+    try {
+      setReceiptFile(file);
+      
+      // Upload and process with OpenAI Vision API
+      const extractedData = await uploadAndProcessReceipt({ file });
+      
+      // Auto-fill form with extracted data
+      setFormData(prev => ({
+        ...prev,
+        amount: extractedData.amount.toString(),
+        description: extractedData.description,
+        category: extractedData.category,
+        date: extractedData.date
+      }));
+      
+    } catch (error) {
+      console.error("Receipt processing failed:", error);
+      setError("Failed to process receipt. Please try again.");
+    } finally {
+      setIsProcessingReceipt(false);
+    }
   };
 
   return (
@@ -149,6 +179,37 @@ export default function ExpenseForm({ onClose, onSuccess }: ExpenseFormProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+            </div>
+
+            <div>
+              <label htmlFor="receipt" className="block text-sm font-medium text-gray-700 mb-2">
+                Receipt Image
+              </label>
+              <input
+                id="receipt"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleReceiptUpload(file);
+                  }
+                }}
+                disabled={isProcessingReceipt}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+              />
+              {isProcessingReceipt ? (
+                <p className="text-sm text-blue-600 mt-1 flex items-center">
+                  <span className="animate-spin mr-2">🔄</span>
+                  Processing receipt with AI...
+                </p>
+              ) : receiptFile ? (
+                <p className="text-sm text-green-600 mt-1">
+                  ✅ Receipt processed: {receiptFile.name}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 mt-1">Upload a receipt image to auto-fill expense details</p>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4">
