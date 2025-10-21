@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "convex": "^1.28.0",
     "convex-helpers": "^0.1.104",
+    "lightningcss": "^1.30.2",
     "lucide-react": "^0.546.0",
     "next": "15.5.6",
     "openai": "^6.5.0",

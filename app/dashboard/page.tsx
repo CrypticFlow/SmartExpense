@@ -50,11 +50,11 @@ export default function Dashboard() {
   const approvedCount = myExpenses?.filter(e => e.status === "approved").length || 0;
 
   return (
-    <div className={`min-h-screen transition-all duration-500 p-6 ${colorScheme.cardBg}`}>
+    <div className={`min-h-screen transition-all duration-500 p-4 sm:p-6 ${colorScheme.cardBg}`}>
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className={`text-3xl font-bold transition-colors duration-500 ${colorScheme.primary}`}>
+            <h1 className={`text-2xl sm:text-3xl font-bold transition-colors duration-500 ${colorScheme.primary}`}>
               Smart<span className={colorScheme.accent}>Expense</span>
             </h1>
             <p className={`transition-colors duration-500 ${colorScheme.secondary}`}>
@@ -66,35 +66,35 @@ export default function Dashboard() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Button 
-              className={`${colorScheme.button} text-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}
+              className={`${colorScheme.button} text-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto`}
               onClick={() => setShowExpenseForm(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Expense
             </Button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
               <SignOutButton>
-                <Button variant="outline">
+                <Button variant="outline" className="flex-1 sm:flex-none">
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  <span className="hidden sm:inline">Sign Out</span>
                 </Button>
               </SignOutButton>
               <img 
                 src={user.imageUrl} 
                 alt="Profile"
-                className="w-10 h-10 rounded-full border-2 border-gray-200"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-gray-200"
               />
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 mb-8">
+        <div className="flex overflow-x-auto border-b border-gray-200 mb-6 sm:mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-6 py-3 font-medium text-sm ${
+            className={`px-4 sm:px-6 py-3 font-medium text-sm whitespace-nowrap ${
               activeTab === "overview"
                 ? "border-b-2 border-blue-600 text-blue-600"
                 : "text-gray-500 hover:text-gray-700"
@@ -104,37 +104,37 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-6 py-3 font-medium text-sm flex items-center gap-2 ${
+            className={`px-4 sm:px-6 py-3 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
               activeTab === "analytics"
                 ? "border-b-2 border-blue-600 text-blue-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
             <BarChart3 className="h-4 w-4" />
-            Analytics
+            <span className="hidden sm:inline">Analytics</span>
           </button>
           <button
             onClick={() => setActiveTab("budgets")}
-            className={`px-6 py-3 font-medium text-sm flex items-center gap-2 ${
+            className={`px-4 sm:px-6 py-3 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
               activeTab === "budgets"
                 ? "border-b-2 border-blue-600 text-blue-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
             <Target className="h-4 w-4" />
-            Budgets
+            <span className="hidden sm:inline">Budgets</span>
           </button>
           {(currentUser?.role === "admin" || currentUser?.role === "manager") && (
             <button
               onClick={() => setActiveTab("team")}
-              className={`px-6 py-3 font-medium text-sm flex items-center gap-2 ${
+              className={`px-4 sm:px-6 py-3 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
                 activeTab === "team"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               <Users className="h-4 w-4" />
-              Team
+              <span className="hidden sm:inline">Team</span>
             </button>
           )}
         </div>
