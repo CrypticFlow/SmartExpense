@@ -12,14 +12,21 @@ import ExpenseForm from "@/components/expense-form";
 import AnalyticsDashboard from "@/components/analytics-dashboard";
 import BudgetDashboard from "@/components/budget-dashboard";
 import TeamDashboard from "@/components/team-dashboard";
+import { getBudgetColorScheme, getTeamBudgetHealth, getBudgetHealthMessage } from "@/lib/budget-colors";
 export default function Dashboard() {
   const { user } = useUser();
   const currentUser = useQuery(api.users.getCurrentUser);
   const myExpenses = useQuery(api.expenses.getMyExpenses);
   const myTeam = useQuery(api.teams.getMyTeam);
+  const activeBudgets = useQuery(api.budgets.getActive);
   const router = useRouter();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "analytics" | "budgets" | "team">("overview");
+
+  // Calculate team budget health for dynamic colors
+  const teamBudgetHealth = getTeamBudgetHealth(activeBudgets || []);
+  const colorScheme = getBudgetColorScheme(teamBudgetHealth);
+  const healthMessage = getBudgetHealthMessage(teamBudgetHealth);
 
   useEffect(() => {
     if (!user) {
@@ -43,18 +50,25 @@ export default function Dashboard() {
   const approvedCount = myExpenses?.filter(e => e.status === "approved").length || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className={`min-h-screen transition-all duration-500 p-6 ${colorScheme.cardBg}`}>
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Smart<span className="text-blue-600">Expense</span>
+            <h1 className={`text-3xl font-bold transition-colors duration-500 ${colorScheme.primary}`}>
+              Smart<span className={colorScheme.accent}>Expense</span>
             </h1>
-            <p className="text-gray-600">Welcome back, {user.firstName || user.emailAddresses[0].emailAddress}</p>
+            <p className={`transition-colors duration-500 ${colorScheme.secondary}`}>
+              Welcome back, {user.firstName || user.emailAddresses[0].emailAddress}
+            </p>
+            {activeBudgets && activeBudgets.length > 0 && (
+              <p className={`text-sm mt-1 font-medium transition-colors duration-500 ${colorScheme.accent}`}>
+                {healthMessage}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <Button 
-              className="bg-red-300 text-black hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] hover:-translate-y-1 transition-all duration-200"
+              className={`${colorScheme.button} text-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}
               onClick={() => setShowExpenseForm(true)}
             >
               <Plus className="h-4 w-4 mr-2" />

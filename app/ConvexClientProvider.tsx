@@ -16,7 +16,6 @@ export default function ConvexClientProvider({
     <ConvexProviderWithClerk 
       client={convex} 
       useAuth={useAuth}
-      verbose={true}
     >
       {children}
     </ConvexProviderWithClerk>

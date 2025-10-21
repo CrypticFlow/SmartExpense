@@ -141,7 +141,7 @@ users: {
   name: string;
   email: string;
   role: "admin" | "manager" | "employee";
-  teamId?: Id<"teams">;
+  teamId: Id<"teams">;
 }
 ```
 
@@ -165,10 +165,10 @@ expenses: {
   status: "pending" | "approved" | "rejected";
   submittedBy: Id<"users">;
   teamId: Id<"teams">;
-  receiptUrl?: string;
-  receiptStorageId?: Id<"_storage">;
-  approvedBy?: Id<"users">;
-  approvedAt?: string;
+  receiptUrl: string;
+  receiptStorageId: Id<"_storage">;
+  approvedBy: Id<"users">;
+  approvedAt: string;
 }
 ```
 
@@ -178,7 +178,7 @@ expenses: {
 budgets: {
   name: string;
   amount: number;
-  category?: string;
+  category: string;
   teamId: Id<"teams">;
   createdBy: Id<"users">;
   period: "monthly" | "quarterly" | "yearly";
@@ -186,7 +186,7 @@ budgets: {
   endDate: string;
   alertThreshold: number;
   isActive: boolean;
-  spent?: number;
+  spent: number;
 }
 ```
 
@@ -216,6 +216,16 @@ teamInvitations: {
   inviteCode: string;
   createdAt: string;
   expiresAt: string;
+}
+```
+
+#### Categories
+
+```typescript
+categories: {
+  name: string;
+  teamId: Id<"teams">;
+  isDefault: boolean;
 }
 ```
 

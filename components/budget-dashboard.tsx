@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, AlertTriangle, CheckCircle, XCircle, Bell } from "lucide-react";
 import BudgetForm from "./budget-form";
+import { 
+  calculateBudgetUsage, 
+  getBudgetColorScheme, 
+  getProgressBarStyle, 
+  getAmountTextColor,
+  getBudgetStatusIcon 
+} from "@/lib/budget-colors";
 
 export default function BudgetDashboard() {
   const [showBudgetForm, setShowBudgetForm] = useState(false);
@@ -112,63 +119,82 @@ export default function BudgetDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {budgets?.map((budget) => {
           const spent = budget.spent || 0;
-          const percentage = (spent / budget.amount) * 100;
-          const { status, color, icon: StatusIcon } = getBudgetStatus(spent, budget.amount, budget.alertThreshold);
+          const percentage = calculateBudgetUsage(spent, budget.amount);
+          const budgetColorScheme = getBudgetColorScheme(percentage);
+          const progressBarStyle = getProgressBarStyle(percentage);
+          const amountColor = getAmountTextColor(percentage);
+          const statusIcon = getBudgetStatusIcon(percentage);
           
           return (
-            <Card key={budget._id} className={`border-${color}-200`}>
+            <Card key={budget._id} className={`transition-all duration-500 ${budgetColorScheme.border} ${budgetColorScheme.cardBg} hover:shadow-lg`}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{budget.name}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <CardTitle className={`text-lg transition-colors duration-500 ${budgetColorScheme.primary}`}>
+                      {budget.name} {statusIcon}
+                    </CardTitle>
+                    <p className={`text-sm mt-1 transition-colors duration-500 ${budgetColorScheme.secondary}`}>
                       {budget.category || "All Categories"} • {budget.period}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className={`text-xs mt-1 transition-colors duration-500 ${budgetColorScheme.secondary}`}>
                       Created by {(budget as any).creatorName || currentUser?.name}
                     </p>
                   </div>
-                  <StatusIcon className={`h-5 w-5 text-${color}-600`} />
+                  <div className={`text-2xl transition-all duration-500 ${budgetColorScheme.accent}`}>
+                    {Math.round(percentage)}%
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* Progress Bar */}
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Spent</span>
-                      <span>{Math.round(percentage)}%</span>
+                    <div className={`flex justify-between text-sm mb-2 transition-colors duration-500 ${budgetColorScheme.secondary}`}>
+                      <span>Budget Progress</span>
+                      <span className={`font-bold ${budgetColorScheme.accent}`}>{Math.round(percentage)}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          percentage >= 100 ? 'bg-red-500' : 
-                          percentage >= budget.alertThreshold ? 'bg-yellow-500' : 'bg-green-500'
-                        }`}
+                        className={`h-3 rounded-full transition-all duration-700 ${progressBarStyle} shadow-sm`}
                         style={{ width: `${Math.min(percentage, 100)}%` }}
                       />
                     </div>
+                    {percentage > 100 && (
+                      <p className="text-xs text-red-600 font-medium mt-1 animate-pulse">
+                        Over budget by {Math.round(percentage - 100)}%!
+                      </p>
+                    )}
                   </div>
 
                   {/* Budget Details */}
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Spent:</span>
-                      <span className="font-medium">{formatCurrency(spent)}</span>
+                      <span className={`transition-colors duration-500 ${budgetColorScheme.secondary}`}>Spent:</span>
+                      <span className={`font-bold transition-colors duration-500 ${amountColor}`}>
+                        {formatCurrency(spent)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Budget:</span>
-                      <span className="font-medium">{formatCurrency(budget.amount)}</span>
+                      <span className={`transition-colors duration-500 ${budgetColorScheme.secondary}`}>Budget:</span>
+                      <span className={`font-medium transition-colors duration-500 ${budgetColorScheme.primary}`}>
+                        {formatCurrency(budget.amount)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Remaining:</span>
-                      <span className={`font-medium ${budget.amount - spent < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      <span className={`transition-colors duration-500 ${budgetColorScheme.secondary}`}>Remaining:</span>
+                      <span className={`font-bold transition-colors duration-500 ${
+                        budget.amount - spent < 0 
+                          ? 'text-red-600 animate-pulse' 
+                          : percentage > 80 
+                            ? 'text-orange-600' 
+                            : 'text-green-600'
+                      }`}>
                         {formatCurrency(budget.amount - spent)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Period:</span>
-                      <span className="font-medium">
+                      <span className={`transition-colors duration-500 ${budgetColorScheme.secondary}`}>Period:</span>
+                      <span className={`text-xs transition-colors duration-500 ${budgetColorScheme.secondary}`}>
                         {new Date(budget.startDate).toLocaleDateString()} - {new Date(budget.endDate).toLocaleDateString()}
                       </span>
                     </div>

@@ -51,7 +51,7 @@ export const getMyTeam = query({
 
     if (!user) return null;
 
-    return await ctx.db.get(user.teamId);
+    return user.teamId ? await ctx.db.get(user.teamId) : null;
   },
 });
 
